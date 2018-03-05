@@ -5,10 +5,13 @@ import java.util.concurrent.atomic.AtomicInteger
 import scala.collection.mutable
 
 @PeriodicWallClockWindow(10)
-class CountWords extends AbstractKernel[(String, Int), Iterable[(String, Int)]] {
+class CountWords extends AbstractKernel[(String, Int), (String, Int)] {
 
   private var map: mutable.OpenHashMap[String, AtomicInteger] = _
 
+  /**
+    * Initialize the map.
+    */
   override def init(): Unit = {
     super.init()
     map = new mutable.OpenHashMap[String, AtomicInteger](10 * 1000)
@@ -57,8 +60,9 @@ class CountWords extends AbstractKernel[(String, Int), Iterable[(String, Int)]] 
     * Close a processing window.
     * Windows are defined through annotations.
     */
-  override def closeWindow(): Unit = {
-    super.closeWindow()
-    this.sink(this.map.map{ case (w, ac) => (w, ac.get())}, new Timestamp(System.currentTimeMillis()))
+  override def closeWindow(ts: Timestamp): Unit = {
+    super.closeWindow(ts)
+    this.map.map{ case (w, ac) => (w, ac.get())}.foreach(this.sink(_, ts))
+    this.map.clear()
   }
 }

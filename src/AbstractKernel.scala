@@ -1,13 +1,15 @@
 import java.io.{InputStream, OutputStream}
 import java.sql.Timestamp
 
-abstract class AbstractKernel[InputEvent, OutputEvent] extends KernelTrait[InputEvent, OutputEvent] {
+abstract class AbstractKernel[InputEvent, OutputEvent]
+  extends KernelTrait[InputEvent, OutputEvent] {
 
   protected var sink: (OutputEvent, Timestamp) => Unit = _
 
   /**
     * Initialize the kernel to initial state.
-    * Intentionally parameterless.
+    * Intentionally paremeterless: global context is a concern of implementations.
+    * This method will simply initialize the state to initial.
     */
   override def init(): Unit = {}
 
@@ -22,7 +24,7 @@ abstract class AbstractKernel[InputEvent, OutputEvent] extends KernelTrait[Input
     * Close a processing window.
     * Windows are defined through annotations.
     */
-  override def closeWindow(): Unit = {}
+  override def closeWindow(ts: Timestamp): Unit = {}
 
   /**
     * Serialize the state into an output stream.
@@ -47,7 +49,7 @@ abstract class AbstractKernel[InputEvent, OutputEvent] extends KernelTrait[Input
     */
   override def deactivate(): Unit = {
     if (this.sink != null) {
-      this.closeWindow()
+      this.closeWindow(new Timestamp(System.currentTimeMillis()))
       this.sink = null
     }
   }

@@ -11,7 +11,6 @@ class SplitWords extends AbstractKernel[String, (String, Int)] {
 
   /**
     * Initialize the kernel to initial state.
-    * Intentionally parameterless.
     */
   override def init(): Unit = {
     this.buffer = new ArrayBuffer[(String, Int)]()
@@ -37,12 +36,12 @@ class SplitWords extends AbstractKernel[String, (String, Int)] {
     * Close a processing window.
     * Windows are defined through annotations.
     */
-  override def closeWindow(): Unit = {
-    super.closeWindow()
+  override def closeWindow(ts: Timestamp): Unit = {
+    super.closeWindow(ts)
 
     // Emit all buffered
     for (i <- this.buffer)
-      this.sink(i, new Timestamp(System.currentTimeMillis()))
+      this.sink(i, ts)
 
     // Clear
     this.buffer.clear()

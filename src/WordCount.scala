@@ -11,8 +11,9 @@ object WordCount extends App {
 
   countWords.init(); splitWords.init()
 
-  def topologyOutput(ev: Iterable[(String, Int)], ts: Timestamp): Unit =
-    ev.foreach{ case (w, c) => println(s"$ts: $w -> $c")}
+  def topologyOutput(ev: (String, Int), ts: Timestamp): Unit = ev match {
+    case (w, c) => println (s"$ts: $w -> $c")
+  }
 
   // Link & activate
   countWords.activate(topologyOutput)

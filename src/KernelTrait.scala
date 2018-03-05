@@ -41,11 +41,12 @@ class EventCountWindow(value: Int) extends Annotation
   * @tparam InputEvent Type of the input events this kernel can process.
   * @tparam OutputEvent Type of the output events this kernel emits.
   */
-trait KernelTrait[-InputEvent, +OutputEvent] {
+trait KernelTrait[InputEvent, OutputEvent] {
 
   /**
     * Initialize the kernel to initial state.
-    * Intentionally parameterless.
+    * Intentionally paremeterless: global context is a concern of implementations.
+    * This method will simply initialize the state to initial.
     */
   def init(): Unit
 
@@ -67,8 +68,9 @@ trait KernelTrait[-InputEvent, +OutputEvent] {
   /**
     * Close a processing window.
     * Windows are defined through annotations.
+    * @param ts timestamp of the window closing.
     */
-  def closeWindow(): Unit
+  def closeWindow(ts: Timestamp): Unit
 
   /**
     * Serialize the state into an output stream.
