@@ -33,6 +33,7 @@ abstract class AbstractTopology[InputEvent, OutputEvent]
     // Blocking queue
     private val queue = new ArrayBlockingQueue[(Event, Timestamp)](length)
     private var process_events = true
+    private var threads: Iterable[Thread] = _
 
     /**
       * Input an element waiting if pipe is full.
@@ -48,7 +49,8 @@ abstract class AbstractTopology[InputEvent, OutputEvent]
       */
     def activate(output_sink_factory: Int => (Event, Timestamp) => Unit): Unit = {
       // Start the dequeueing threads
-      (0 until num_pump_threads).map(i => new Thread {
+      threads = (0 until num_pump_threads).map(i => new Thread {
+        this.setName(s"Pipe$name$i")
         override def run(): Unit = {
           val sink = output_sink_factory(i)
           while (process_events || !queue.isEmpty) {
@@ -60,11 +62,18 @@ abstract class AbstractTopology[InputEvent, OutputEvent]
             }
           }
         }
-      }).foreach(t => t.start())
+      })
+      threads.foreach(_.start())
     }
 
     def deactivate(): Unit = {
       process_events = false
+
+      // Interrupt waiting threads
+      threads.foreach(_.interrupt())
+
+      // Spin in-place until queue is empty
+      while (!queue.isEmpty) Thread.sleep(1)
     }
   }
 

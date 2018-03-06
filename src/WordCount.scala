@@ -8,7 +8,7 @@ import scala.reflect.runtime.universe._
 class WordCount extends AbstractTopology[String, (String, Int)] {
 
   val countWords = new CountWords
-  val pipe = new Pipe[(String, Int)](name = "bridge", length = 1, num_pump_threads = 1)
+  val pipe = new Pipe[(String, Int)](name = "Bridge", length = 1, num_pump_threads = 1)
   val splitWords = new SplitWords
 
   override def init(): Unit = {
