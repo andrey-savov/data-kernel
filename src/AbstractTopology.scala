@@ -51,7 +51,7 @@ abstract class AbstractTopology[InputEvent, OutputEvent]
       (0 until num_pump_threads).map(i => new Thread {
         override def run(): Unit = {
           val sink = output_sink_factory(i)
-          while (process_events) {
+          while (process_events || !queue.isEmpty) {
             try {
               val (e, ts) = queue.take()
               sink(e, ts)

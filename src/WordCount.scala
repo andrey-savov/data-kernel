@@ -29,8 +29,17 @@ class WordCount extends AbstractTopology[String, (String, Int)] {
 
     // Link & activate
     countWords.activate(sink)
-    pipe.activate(_ => countWords.process)
+    pipe.activate(sinkFactory)
     splitWords.activate(pipe.input)
+  }
+
+  override def deactivate(): Unit = {
+    super.deactivate()
+
+    // Deactivate in reverse order
+    splitWords.deactivate()
+    pipe.deactivate()
+    countWords.deactivate()
   }
 
   /**
