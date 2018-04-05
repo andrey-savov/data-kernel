@@ -4,7 +4,7 @@ import java.sql.Timestamp
 import scala.collection.mutable.ArrayBuffer
 
 @EventCountWindow(60)
-class SplitWords extends AbstractKernel[String, (String, Int)] {
+class SplitWords extends AbstractKernel[String, (String, Int)]("SplitWords") {
 
   // Local buffer that will hold the words and their local (line) counts
   private var buffer: ArrayBuffer[(String, Int)] = _
@@ -28,7 +28,7 @@ class SplitWords extends AbstractKernel[String, (String, Int)] {
     val local_count = ev
       .split("\\W+")
       .groupBy(s => s)
-      .map { case (w, l) => (w, l.length)}
+      .map { case (w, l) => (w, l.length) }
     local_count.foreach(buffer.append(_))
   }
 

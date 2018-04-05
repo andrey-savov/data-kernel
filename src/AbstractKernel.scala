@@ -1,7 +1,7 @@
 import java.io.{InputStream, OutputStream}
 import java.sql.Timestamp
 
-abstract class AbstractKernel[InputEvent, OutputEvent]
+abstract class AbstractKernel[InputEvent, OutputEvent](val name: String)
   extends KernelTrait[InputEvent, OutputEvent] {
 
   protected var sink: (OutputEvent, Timestamp) => Unit = _
@@ -18,7 +18,7 @@ abstract class AbstractKernel[InputEvent, OutputEvent]
     *
     * @param sink callback to use to output
     */
-  override def activate(sink: (OutputEvent, Timestamp) => Unit): Unit = this.sink = sink
+  override def activate(sink: OutputSink): Unit = this.sink = sink
 
   /**
     * Close a processing window.
@@ -61,4 +61,30 @@ abstract class AbstractKernel[InputEvent, OutputEvent]
   override def cleanup(): Unit = {
     this.deactivate()
   }
+
+  /**
+    * Serialize the state into an output stream in parallel, sharded by key.
+    * Do not compress.
+    * May be entered in parallel by multiple threads, each thread affinitized to a particular key.
+    *
+    * @param key     current shard key to serialize
+    * @param numKeys total number shards that will be serialized
+    * @param out     output stream specific to the shard
+    * @throws NotImplementedError in case this is not implemented/supported
+    */
+  override def serializeParallel(key: Int, numKeys: Int, out: OutputStream): Unit =
+    throw new NotImplementedError()
+
+  /**
+    * Deserialize the state from a byte stream in parallel, sharded by a key.
+    * Must be called before activation.
+    * Must be called after initialization.
+    *
+    * @param key     current shard key to deserialize
+    * @param numKeys total number shards that will be deserialized
+    * @param in      input stream specific to the shard
+    * @throws NotImplementedError in case this is not implemented/supported
+    */
+  override def deserializeParallel(key: Int, numKeys: Int, in: InputStream): Unit =
+    throw new NotImplementedError()
 }

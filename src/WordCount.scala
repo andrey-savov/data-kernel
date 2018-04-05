@@ -5,7 +5,7 @@ import scala.reflect.runtime.universe._
 /**
   * Word count topology.
   */
-class WordCount extends AbstractTopology[String, (String, Int)] {
+class WordCount extends AbstractTopology[String, (String, Int)]("WordCount") {
 
   val countWords = new CountWords
   val pipe = new Pipe[(String, Int)](name = "Bridge", length = 1, num_pump_threads = 1)
@@ -16,13 +16,13 @@ class WordCount extends AbstractTopology[String, (String, Int)] {
     countWords.init(); splitWords.init()
   }
 
-  override def activate(sink: ((String, Int), Timestamp) => Unit): Unit = {
+  override def activate(sink: OutputSink): Unit = {
     super.activate(sink)
 
     def deadEnd(event: (String, Int), ts: Timestamp): Unit =
       println("Should not have been called")
 
-    def sinkFactory(thread_index: Int): ((String, Int), Timestamp) => Unit = {
+    def sinkFactory(thread_index: Int): OutputSink = {
       if (thread_index == 0) countWords.process
       else deadEnd
     }

@@ -15,8 +15,8 @@ import scala.util.Try
   * @tparam InputEvent input event type
   * @tparam OutputEvent output event type
   */
-abstract class AbstractTopology[InputEvent, OutputEvent]
-  extends AbstractKernel[InputEvent, OutputEvent] {
+abstract class AbstractTopology[InputEvent, OutputEvent](override val name: String)
+  extends AbstractKernel[InputEvent, OutputEvent](name) {
 
   //TODO: Construct topology via JSON descriptor
 
@@ -58,7 +58,7 @@ abstract class AbstractTopology[InputEvent, OutputEvent]
               val (e, ts) = queue.take()
               sink(e, ts)
             } catch {
-              case _: InterruptedException => {}
+              case _: InterruptedException =>
             }
           }
         }

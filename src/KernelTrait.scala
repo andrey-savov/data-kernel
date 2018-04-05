@@ -43,6 +43,13 @@ class EventCountWindow(value: Int) extends Annotation
   */
 trait KernelTrait[InputEvent, OutputEvent] {
 
+
+  /**
+    * Defined type for the output sink.
+    */
+  type OutputSink = (OutputEvent, Timestamp) => Unit
+
+
   /**
     * Initialize the kernel to initial state.
     * Intentionally paremeterless: global context is a concern of implementations.
@@ -54,7 +61,7 @@ trait KernelTrait[InputEvent, OutputEvent] {
     * Activate the kernel with an output sink.
     * @param sink callback to use to output
     */
-  def activate(sink: (OutputEvent, Timestamp) => Unit): Unit
+  def activate(sink: OutputSink): Unit
 
   /**
     * Process individual event.
@@ -80,12 +87,34 @@ trait KernelTrait[InputEvent, OutputEvent] {
   def serialize(out: OutputStream): Unit
 
   /**
+    * Serialize the state into an output stream in parallel, sharded by key.
+    * Do not compress.
+    * May be entered in parallel by multiple threads, each thread affinitized to a particular key.
+    * @param key current shard key to serialize
+    * @param numKeys total number shards that will be serialized
+    * @param out output stream specific to the shard
+    * @throws NotImplementedError in case this is not implemented/supported
+    */
+  def serializeParallel(key: Int, numKeys: Int, out: OutputStream): Unit
+
+  /**
     * Deserialize the state from a byte stream.
     * Must be called before activation.
     * Must be called after initialization.
     * @param in input stream
     */
   def deserialize(in: InputStream): Unit
+
+  /**
+    * Deserialize the state from a byte stream in parallel, sharded by a key.
+    * Must be called before activation.
+    * Must be called after initialization.
+    * @param key current shard key to deserialize
+    * @param numKeys total number shards that will be deserialized
+    * @param in input stream specific to the shard
+    * @throws NotImplementedError in case this is not implemented/supported
+    */
+  def deserializeParallel(key: Int, numKeys: Int, in: InputStream): Unit
 
   /**
     * Stop processing events and release any resources associated with the output sink.

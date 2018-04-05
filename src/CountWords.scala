@@ -5,7 +5,7 @@ import java.util.concurrent.atomic.AtomicInteger
 import scala.collection.mutable
 
 @PeriodicWallClockWindow(10)
-class CountWords extends AbstractKernel[(String, Int), (String, Int)] {
+class CountWords extends AbstractKernel[(String, Int), (String, Int)]("CountWords") {
 
   private var map: mutable.OpenHashMap[String, AtomicInteger] = _
 
