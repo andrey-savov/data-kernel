@@ -27,8 +27,8 @@ class CountWords extends AbstractKernel[(String, Int), (String, Int)]("CountWord
     */
   override def process(ev: (String, Int), ts: Timestamp): Unit = ev match {
     case (word, count) => this.map
-      .getOrElseUpdate(word, new AtomicInteger(count - 1))
-      .incrementAndGet()
+      .getOrElseUpdate(word, new AtomicInteger(0))
+      .addAndGet(count)
   }
 
   /**
