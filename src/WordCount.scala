@@ -1,15 +1,14 @@
 import java.sql.Timestamp
-
-import scala.reflect.runtime.universe._
+import scala.compiletime.uninitialized
 
 /**
   * Word count topology.
   */
 class WordCount extends AbstractTopology[String, (String, Int)]("WordCount") {
 
-  val countWords = new CountWords
-  val pipe = new Pipe[(String, Int)](name = "Bridge", length = 1, num_pump_threads = 1)
-  val splitWords = new SplitWords
+  private val countWords = new CountWords
+  private val pipe = new Pipe[(String, Int)](name = "Bridge", length = 1, num_pump_threads = 1)
+  private val splitWords = new SplitWords
 
   override def init(): Unit = {
     super.init()
@@ -65,17 +64,17 @@ object WordCount extends App {
 
   // TODO: Read type annotations and spin windowing threads or counters.
 
-  def topologyOutput(ev: (String, Int), ts: Timestamp): Unit = ev match {
+  private def topologyOutput(ev: (String, Int), ts: Timestamp): Unit = ev match {
     case (w, c) => println (s"$ts: $w -> $c")
   }
 
   // Initialize and activate the topology
-  val topology = new WordCount
+  private val topology = new WordCount
   topology.init()
   topology.activate(topologyOutput)
 
   // Feed lines from stdin
-  var line: String = _
+  private var line: String = uninitialized
   while ({ line = StdIn.readLine(); line} != null) {
     topology.process(line, new Timestamp(System.currentTimeMillis()))
   }

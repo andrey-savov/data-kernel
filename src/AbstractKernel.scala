@@ -1,10 +1,11 @@
 import java.io.{InputStream, OutputStream}
 import java.sql.Timestamp
+import scala.compiletime.uninitialized
 
 abstract class AbstractKernel[InputEvent, OutputEvent](val name: String)
   extends KernelTrait[InputEvent, OutputEvent] {
 
-  protected var sink: (OutputEvent, Timestamp) => Unit = _
+  protected var sink: (OutputEvent, Timestamp) => Unit = uninitialized
 
   /**
     * Initialize the kernel to initial state.
