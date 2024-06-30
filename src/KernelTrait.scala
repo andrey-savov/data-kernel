@@ -5,7 +5,7 @@ import scala.annotation.Annotation
 
 /**
   * Annotation used to require time ordered input of events.
-  * @param value Whether the kernel requires a timeo-ordered series of events
+  * @param value Whether the kernel requires a time-ordered series of events
   */
 class RequiresTimeOrderedInput(value: Boolean = false) extends Annotation
 

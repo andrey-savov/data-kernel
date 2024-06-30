@@ -1,13 +1,11 @@
 import java.sql.Timestamp
-import java.util.concurrent.{ArrayBlockingQueue, BlockingQueue, TimeUnit}
-
-import scala.collection.mutable.ArrayBuffer
-import scala.util.Try
+import java.util.concurrent.ArrayBlockingQueue
+import scala.compiletime.uninitialized
 
 /**
   * Reusable aggregate of kernels, including queued event transfer between them.
   * Provides the ability to compose new data processing functionality from existing kernels
-  * and/or topolgies.
+  * and/or topologies.
   *
   * Provides the ability to employ threads in transferring events from kernel to kernel to compensate for
   * differences in event processing latencies.
@@ -33,7 +31,7 @@ abstract class AbstractTopology[InputEvent, OutputEvent](override val name: Stri
     // Blocking queue
     private val queue = new ArrayBlockingQueue[(Event, Timestamp)](length)
     private var process_events = true
-    private var threads: Iterable[Thread] = _
+    private var threads: Iterable[Thread] = uninitialized
 
     /**
       * Input an element waiting if pipe is full.
@@ -50,7 +48,7 @@ abstract class AbstractTopology[InputEvent, OutputEvent](override val name: Stri
     def activate(output_sink_factory: Int => (Event, Timestamp) => Unit): Unit = {
       // Start the dequeueing threads
       threads = (0 until num_pump_threads).map(i => new Thread {
-        this.setName(s"Pipe$name$i")
+        this.setName(f"Pipe$name$i")
         override def run(): Unit = {
           val sink = output_sink_factory(i)
           while (process_events || !queue.isEmpty) {

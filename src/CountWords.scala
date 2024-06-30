@@ -1,20 +1,20 @@
 import java.io.{InputStream, ObjectInputStream, ObjectOutputStream, OutputStream}
 import java.sql.Timestamp
 import java.util.concurrent.atomic.AtomicInteger
-
 import scala.collection.mutable
+import scala.compiletime.uninitialized
 
 @PeriodicWallClockWindow(10)
 class CountWords extends AbstractKernel[(String, Int), (String, Int)]("CountWords") {
 
-  private var map: mutable.OpenHashMap[String, AtomicInteger] = _
+  private var map: mutable.HashMap[String, AtomicInteger] = uninitialized
 
   /**
     * Initialize the map.
     */
   override def init(): Unit = {
     super.init()
-    map = new mutable.OpenHashMap[String, AtomicInteger](10 * 1000)
+    map = new mutable.HashMap[String, AtomicInteger](10 * 1000, 1d)
   }
 
   /**
@@ -53,7 +53,7 @@ class CountWords extends AbstractKernel[(String, Int), (String, Int)]("CountWord
   override def deserialize(in: InputStream): Unit = {
     super.deserialize(in)
     val is = new ObjectInputStream(in)
-    this.map = is.readObject().asInstanceOf[mutable.OpenHashMap[String, AtomicInteger]]
+    this.map = is.readObject().asInstanceOf[mutable.HashMap[String, AtomicInteger]]
   }
 
   /**

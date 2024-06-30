@@ -65,7 +65,7 @@ object WordCount extends App {
   // TODO: Read type annotations and spin windowing threads or counters.
 
   private def topologyOutput(ev: (String, Int), ts: Timestamp): Unit = ev match {
-    case (w, c) => println (s"$ts: $w -> $c")
+    case (w, c) => println (f"$ts: $w -> $c")
   }
 
   // Initialize and activate the topology
